@@ -31,7 +31,6 @@ class HomeTableViewController: UITableViewController {
             for tweet in tweets {
                 self.tweetArray.append(tweet)
             }
-            self.numberOfTweets = self.tweetArray.count
             self.tableView.reloadData()
         }, failure: { (Error) in
             print("Could not retriev tweets!")
@@ -55,6 +54,13 @@ class HomeTableViewController: UITableViewController {
         cell.userNameLabel.text = user["name"] as? String
         cell.tweetContentLabel.text = tweetArray[indexPath.row]["text"] as? String
         
+        let imageUrl = URL(string: (user["profile_image_url_https"] as? String)!)
+        let data = try? Data(contentsOf: imageUrl!)
+        
+        if let imageData = data {
+            cell.profileImageView.image = UIImage(data: imageData)
+        }
+        
         return cell
     }
     
@@ -67,7 +73,7 @@ class HomeTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return numberOfTweets
+        return self.tweetArray.count
     }
 
 }
