@@ -10,12 +10,34 @@ import UIKit
 
 class HomeTableViewController: UITableViewController {
 
+    var tweetArray = [NSDictionary]()
+    var numberOfTweets: Int!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        
+        loadTweet()
     }
 
+    func loadTweet() {
+        let url = "https://api.twitter.com/1.1/statuses/home_timeline.json"
+        let params = ["count": 10]
+        
+        
+        TwitterAPICaller.client?.getDictionariesRequest(url: url, parameters: params, success: { (tweets: [NSDictionary]) in
+            // clean list up and repopulate
+            self.tweetArray.removeAll()
+            
+            // store tweets
+            for tweet in tweets {
+                self.tweetArray.append(tweet)
+            }
+            self.numberOfTweets = self.tweetArray.count
+            self.tableView.reloadData()
+        }, failure: { (Error) in
+            print("Could not retriev tweets!")
+        })
+    }
+    
     @IBAction func onLogout(_ sender: Any) {
         TwitterAPICaller.client?.logout()
         
@@ -29,8 +51,9 @@ class HomeTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "tweetCell", for: indexPath) as! TweetCellTableViewCell
         
-        //cell.userNameLabel.text = "get name"
-        //cell.tweetContentLabel.text = "get tweet"
+        let user = tweetArray[indexPath.row]["user"] as! NSDictionary
+        cell.userNameLabel.text = user["name"] as? String
+        cell.tweetContentLabel.text = tweetArray[indexPath.row]["text"] as? String
         
         return cell
     }
@@ -44,7 +67,7 @@ class HomeTableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of rows
-        return 5
+        return numberOfTweets
     }
 
 }
